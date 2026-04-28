@@ -1,16 +1,79 @@
-# React + Vite
+# Mini Laundry Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend application for the Mini Laundry Order Management System.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React
+- Vite
+- React Router
+- Axios
+- Tailwind CSS
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Admin login flow
+- Dashboard with:
+  - net revenue
+  - refunded amount
+  - per-status counts
+  - net/gross chart toggle with smooth transitions
+- Orders page:
+  - list/search/filter
+  - status update
+  - quick mark delivered
+  - CSV export
+- Order details:
+  - status timeline
+  - invoice/delivery slip print/download
+- Create/Edit order forms:
+  - dynamic garments with add/remove
+  - mobile-friendly layout
 
-## Expanding the ESLint configuration
+## Mobile Responsiveness
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Optimized for small screens:
+- responsive navbar and mobile nav items
+- stacked header/actions on narrow widths
+- mobile-friendly filters and form actions
+- responsive dashboard chart rows
+
+## Environment
+
+Create `.env` from `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+`.env` value:
+
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+## Run Locally
+
+```bash
+npm install
+npm run dev
+```
+
+App runs on:
+- `http://localhost:5173`
+
+## Build
+
+```bash
+npm run build
+```
+
+## Demo Credentials
+
+- Email: `admin@laundry.com`
+- Password: `admin123`
+
+## Notes
+
+- This frontend expects the backend API to be running.
+- `.env` is gitignored; `.env.example` is committed.
