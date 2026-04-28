@@ -25,10 +25,16 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
   const [chartMode, setChartMode] = useState('NET');
   const [isChartTransitioning, setIsChartTransitioning] = useState(false);
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 6);
+    return d.toISOString().slice(0, 10);
+  });
+  const [endDate, setEndDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   useEffect(() => {
     fetchDashboard();
-  }, []);
+  }, [startDate, endDate]);
 
   useEffect(() => {
     setIsChartTransitioning(true);
@@ -39,7 +45,10 @@ export default function DashboardPage() {
   const fetchDashboard = async () => {
     setLoading(true);
     try {
-      const [dashRes, ordersRes] = await Promise.all([getDashboardApi(), getAllOrdersApi()]);
+      const [dashRes, ordersRes] = await Promise.all([
+        getDashboardApi({ startDate, endDate }),
+        getAllOrdersApi(),
+      ]);
       if (dashRes.success) setMetrics(dashRes.data);
       if (ordersRes.success) setRecentOrders(ordersRes.data);
     } catch (err) {
@@ -107,6 +116,41 @@ export default function DashboardPage() {
         </div>
       )}
 
+      <div className="glass-panel rounded-2xl p-4 sm:p-5 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+          <div className="w-full sm:w-auto">
+            <label className="block text-xs font-medium text-slate-500 mb-1">Start Date</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full sm:w-[170px] px-3 py-2 rounded-xl glass-input text-sm text-slate-700"
+            />
+          </div>
+          <div className="w-full sm:w-auto">
+            <label className="block text-xs font-medium text-slate-500 mb-1">End Date</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full sm:w-[170px] px-3 py-2 rounded-xl glass-input text-sm text-slate-700"
+            />
+          </div>
+          <button
+            onClick={() => {
+              const today = new Date();
+              const s = new Date();
+              s.setDate(today.getDate() - 6);
+              setStartDate(s.toISOString().slice(0, 10));
+              setEndDate(today.toISOString().slice(0, 10));
+            }}
+            className="w-full sm:w-auto px-4 py-2 text-sm rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50"
+          >
+            Last 7 Days
+          </button>
+        </div>
+      </div>
+
       {metrics && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <DashboardCard title="Today's Orders" value={metrics.todayOrders} icon={<FiCalendar />} color="purple" subtitle="Orders received today" />
@@ -132,6 +176,11 @@ export default function DashboardPage() {
               <FiBarChart2 />
               Revenue vs Refund Trend
             </h2>
+            <div className="text-xs text-slate-500">
+              {startDate} to {endDate}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div className="flex flex-wrap items-center gap-2">
               <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200">
                 <button
