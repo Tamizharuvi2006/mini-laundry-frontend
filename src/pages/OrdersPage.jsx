@@ -10,6 +10,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [garmentFilter, setGarmentFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
   const fetchOrders = useCallback(async () => {
@@ -17,6 +18,7 @@ export default function OrdersPage() {
     try {
       const params = {};
       if (search) params.search = search;
+      if (garmentFilter) params.garment = garmentFilter;
       if (statusFilter !== 'ALL') params.status = statusFilter;
 
       const res = await getAllOrdersApi(params);
@@ -26,7 +28,7 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, statusFilter]);
+  }, [search, garmentFilter, statusFilter]);
 
   useEffect(() => {
     const timer = setTimeout(fetchOrders, 300);
@@ -62,6 +64,7 @@ export default function OrdersPage() {
 
   const clearFilters = () => {
     setSearch('');
+    setGarmentFilter('');
     setStatusFilter('ALL');
   };
 
@@ -137,6 +140,8 @@ export default function OrdersPage() {
       <FilterBar
         search={search}
         onSearchChange={setSearch}
+        garmentFilter={garmentFilter}
+        onGarmentFilterChange={setGarmentFilter}
         statusFilter={statusFilter}
         onStatusFilterChange={setStatusFilter}
         onClear={clearFilters}
