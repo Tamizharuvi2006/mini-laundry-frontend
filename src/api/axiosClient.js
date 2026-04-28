@@ -1,8 +1,12 @@
 import axios from 'axios';
 
-const API_BASE_URL =
+const rawBaseUrl =
   import.meta.env.VITE_API_BASE_URL ||
   'https://mini-laundry-backend.onrender.com/api';
+
+const API_BASE_URL = rawBaseUrl.replace(/\/+$/, '').endsWith('/api')
+  ? rawBaseUrl.replace(/\/+$/, '')
+  : `${rawBaseUrl.replace(/\/+$/, '')}/api`;
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
