@@ -1,5 +1,5 @@
 export default function FilterBar({ search, onSearchChange, statusFilter, onStatusFilterChange, onClear }) {
-  const statuses = ['ALL', 'RECEIVED', 'PROCESSING', 'READY', 'DELIVERED'];
+  const statuses = ['ALL', 'RECEIVED', 'PROCESSING', 'READY', 'DELIVERED', 'REFUNDED'];
 
   return (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 animate-fade-in">

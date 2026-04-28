@@ -19,16 +19,13 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    // Fetch dynamic products
     const loadProducts = async () => {
       try {
         const res = await getProductsApi();
         if (res.success && res.data.length > 0) {
-          setAvailableProducts(res.data.map(p => ({ type: p.name, price: Number(p.price) })));
-          
-          // Only reset initial garments if not editing and products loaded
+          setAvailableProducts(res.data.map((p) => ({ type: p.name, price: Number(p.price) })));
           if (!initialData && garments[0].type === 'Shirt' && res.data[0]) {
-             setGarments([{ type: res.data[0].name, quantity: 1 }]);
+            setGarments([{ type: res.data[0].name, quantity: 1 }]);
           }
         }
       } catch (err) {
@@ -37,7 +34,6 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
     };
     loadProducts();
 
-    // Load initial data for editing
     if (initialData) {
       setCustomerName(initialData.customer_name || '');
       setPhone(initialData.phone || '');
@@ -49,7 +45,7 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
   }, [initialData]);
 
   const addGarment = () => {
-    setGarments([...garments, { type: 'Shirt', quantity: 1 }]);
+    setGarments([...garments, { type: availableProducts[0]?.type || 'Shirt', quantity: 1 }]);
   };
 
   const removeGarment = (index) => {
@@ -59,7 +55,7 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
 
   const updateGarment = (index, field, value) => {
     const updated = [...garments];
-    updated[index] = { ...updated[index], [field]: field === 'quantity' ? parseInt(value) || 0 : value };
+    updated[index] = { ...updated[index], [field]: field === 'quantity' ? parseInt(value, 10) || 0 : value };
     setGarments(updated);
   };
 
@@ -68,7 +64,7 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
     return found ? found.price : 0;
   };
 
-  const previewTotal = garments.reduce((sum, g) => sum + (g.quantity * getPrice(g.type)), 0);
+  const finalAmount = garments.reduce((sum, g) => sum + g.quantity * getPrice(g.type), 0);
 
   const validate = () => {
     const errs = {};
@@ -103,13 +99,12 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
     setCustomerName('');
     setPhone('');
     setEstimatedDeliveryDate('');
-    setGarments([{ type: 'Shirt', quantity: 1 }]);
+    setGarments([{ type: availableProducts[0]?.type || 'Shirt', quantity: 1 }]);
     setErrors({});
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
-      {/* Customer Details */}
       <div className="glass-panel rounded-2xl p-6">
         <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
           <FiUser className="text-lg text-primary-500" /> Customer Details
@@ -122,7 +117,9 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
               placeholder="e.g. Tamizh"
-              className={`w-full px-4 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${errors.customerName ? 'border-rose-300 bg-rose-50' : 'border-slate-200 bg-white'}`}
+              className={`w-full px-4 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${
+                errors.customerName ? 'border-rose-300 bg-rose-50' : 'border-slate-200 bg-white'
+              }`}
             />
             {errors.customerName && <p className="text-xs text-rose-500 mt-1">{errors.customerName}</p>}
           </div>
@@ -133,7 +130,9 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="e.g. 9876543210"
-              className={`w-full px-4 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${errors.phone ? 'border-rose-300 bg-rose-50' : 'border-slate-200 bg-white'}`}
+              className={`w-full px-4 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${
+                errors.phone ? 'border-rose-300 bg-rose-50' : 'border-slate-200 bg-white'
+              }`}
             />
             {errors.phone && <p className="text-xs text-rose-500 mt-1">{errors.phone}</p>}
           </div>
@@ -150,7 +149,6 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
         </div>
       </div>
 
-      {/* Garments */}
       <div className="glass-panel rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
@@ -171,7 +169,7 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
                 >
                   {availableProducts.map((g) => (
                     <option key={g.type} value={g.type}>
-                      {g.type} — ₹{g.price}
+                      {g.type} - INR {g.price}
                     </option>
                   ))}
                 </select>
@@ -186,10 +184,8 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
                   placeholder="Qty"
                 />
               </div>
-              <div className="w-20 text-right">
-                <span className="text-sm font-semibold text-slate-700">
-                  ₹{garment.quantity * getPrice(garment.type)}
-                </span>
+              <div className="w-24 text-right">
+                <span className="text-sm font-semibold text-slate-700">INR {garment.quantity * getPrice(garment.type)}</span>
               </div>
               <button
                 type="button"
@@ -197,7 +193,7 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
                 disabled={garments.length === 1}
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
               >
-                ✕
+                X
               </button>
             </div>
           ))}
@@ -213,15 +209,12 @@ export default function OrderForm({ onSubmit, loading, initialData = null }) {
           </button>
         </div>
 
-        {/* Total Preview */}
         <div className="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between">
-          <span className="text-sm text-slate-500">Preview Total</span>
-          <span className="text-xl font-bold text-slate-800">₹{previewTotal}</span>
+          <span className="text-sm text-slate-500">Final Amount</span>
+          <span className="text-xl font-bold text-slate-800">INR {finalAmount}</span>
         </div>
-        <p className="text-xs text-slate-400 mt-1">* Final amount is calculated by backend</p>
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-3">
         <button
           type="submit"

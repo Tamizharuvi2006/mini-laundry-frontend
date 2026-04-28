@@ -20,6 +20,11 @@ export default function StatusBadge({ status }) {
       text: 'text-primary-700',
       dot: 'bg-primary-500',
     },
+    REFUNDED: {
+      bg: 'bg-rose-50',
+      text: 'text-rose-700',
+      dot: 'bg-rose-500',
+    },
   };
 
   const config = statusConfig[status] || statusConfig.RECEIVED;

@@ -8,7 +8,7 @@ export default function OrdersTable({ orders, onStatusUpdate, onDeleteOrder, onQ
     return <EmptyState title="No orders found" message="Create your first order to get started!" icon={<FiPackage />} />;
   }
 
-  const statusOptions = ['RECEIVED', 'PROCESSING', 'READY', 'DELIVERED'];
+  const statusOptions = ['RECEIVED', 'PROCESSING', 'READY', 'DELIVERED', 'REFUNDED'];
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '—';
@@ -58,7 +58,7 @@ export default function OrdersTable({ orders, onStatusUpdate, onDeleteOrder, onQ
                 <span className="font-semibold text-slate-800">₹{order.total_amount}</span>
               </td>
               <td className="py-3 px-4">
-                {onStatusUpdate ? (
+                {onStatusUpdate && order.status !== 'REFUNDED' ? (
                   <select
                     value={order.status}
                     onChange={(e) => onStatusUpdate(order.order_id, e.target.value)}
@@ -102,7 +102,7 @@ export default function OrdersTable({ orders, onStatusUpdate, onDeleteOrder, onQ
                       <FiTrash2 className="text-lg" />
                     </button>
                   )}
-                  {onQuickDeliver && order.status !== 'DELIVERED' && (
+                  {onQuickDeliver && order.status !== 'DELIVERED' && order.status !== 'REFUNDED' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
