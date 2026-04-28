@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { loginApi } from '../api/authApi';
 import { MdLocalLaundryService } from 'react-icons/md';
 
@@ -9,6 +9,14 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const token = localStorage.getItem('laundry_token');
+
+  const redirectTo = location.state?.from || '/dashboard';
+
+  if (token) {
+    return <Navigate to={redirectTo} replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +28,7 @@ export default function LoginPage() {
       if (result.success) {
         localStorage.setItem('laundry_token', result.data.token);
         localStorage.setItem('laundry_user', JSON.stringify(result.data.user));
-        navigate('/dashboard');
+        navigate(redirectTo, { replace: true });
       } else {
         setError(result.message || 'Login failed');
       }
