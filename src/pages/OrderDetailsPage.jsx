@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getOrderByIdApi, updateOrderStatusApi } from '../api/orderApi';
+import { getOrderByIdApi, getOrderEventsApi, updateOrderStatusApi } from '../api/orderApi';
 import StatusBadge from '../components/StatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { FiUser, FiEdit, FiInfo, FiDownload } from 'react-icons/fi';
@@ -12,6 +12,7 @@ export default function OrderDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [events, setEvents] = useState([]);
 
   useEffect(() => {
     fetchOrder();
@@ -22,6 +23,8 @@ export default function OrderDetailsPage() {
     try {
       const res = await getOrderByIdApi(orderId);
       if (res.success) setOrder(res.data);
+      const eventsRes = await getOrderEventsApi(orderId);
+      if (eventsRes.success) setEvents(eventsRes.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Order not found');
     } finally {
@@ -274,6 +277,25 @@ export default function OrderDetailsPage() {
           <span className="text-sm font-semibold text-slate-600">Total Amount</span>
           <span className="text-xl font-bold text-slate-800">INR {order.total_amount}</span>
         </div>
+      </div>
+
+      <div className="glass-panel rounded-2xl p-6 animate-fade-in">
+        <h3 className="text-sm font-semibold text-slate-800 mb-4">Order Activity</h3>
+        {!events.length ? (
+          <p className="text-sm text-slate-400">No activity logged yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {events.map((event) => (
+              <div key={event.id} className="p-3 rounded-xl bg-white/40 border border-white/60">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-slate-700">{event.event_type}</span>
+                  <span className="text-xs text-slate-400">{formatDateTime(event.created_at)}</span>
+                </div>
+                <p className="text-sm text-slate-600 mt-1">{event.message}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

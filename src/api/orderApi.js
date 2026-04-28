@@ -15,6 +15,11 @@ export async function getOrderByIdApi(orderId) {
   return response.data;
 }
 
+export async function getOrderEventsApi(orderId) {
+  const response = await axiosClient.get(`/orders/${orderId}/events`);
+  return response.data;
+}
+
 export async function updateOrderStatusApi(orderId, status) {
   const response = await axiosClient.patch(`/orders/${orderId}/status`, { status });
   return response.data;
