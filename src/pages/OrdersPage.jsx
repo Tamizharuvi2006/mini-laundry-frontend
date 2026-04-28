@@ -12,6 +12,10 @@ export default function OrdersPage() {
   const [search, setSearch] = useState('');
   const [garmentFilter, setGarmentFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -20,15 +24,21 @@ export default function OrdersPage() {
       if (search) params.search = search;
       if (garmentFilter) params.garment = garmentFilter;
       if (statusFilter !== 'ALL') params.status = statusFilter;
+      params.limit = pageSize;
+      params.offset = (page - 1) * pageSize;
 
       const res = await getAllOrdersApi(params);
-      if (res.success) setOrders(res.data);
+      if (res.success) {
+        setOrders(res.data || []);
+        setTotalOrders(res.total ?? res.count ?? 0);
+        setTotalPages(res.totalPages ?? 1);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch orders');
     } finally {
       setLoading(false);
     }
-  }, [search, garmentFilter, statusFilter]);
+  }, [search, garmentFilter, statusFilter, page, pageSize]);
 
   useEffect(() => {
     const timer = setTimeout(fetchOrders, 300);
@@ -66,6 +76,22 @@ export default function OrdersPage() {
     setSearch('');
     setGarmentFilter('');
     setStatusFilter('ALL');
+    setPage(1);
+  };
+
+  const handleSearchChange = (value) => {
+    setSearch(value);
+    setPage(1);
+  };
+
+  const handleGarmentFilterChange = (value) => {
+    setGarmentFilter(value);
+    setPage(1);
+  };
+
+  const handleStatusFilterChange = (value) => {
+    setStatusFilter(value);
+    setPage(1);
   };
 
   const handleQuickDeliver = async (orderId) => {
@@ -123,7 +149,7 @@ export default function OrdersPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Orders</h1>
           <p className="text-sm text-slate-400 mt-0.5">
-            {orders.length} order{orders.length !== 1 ? 's' : ''} found
+            {totalOrders} order{totalOrders !== 1 ? 's' : ''} found
           </p>
         </div>
         <button
@@ -139,11 +165,11 @@ export default function OrdersPage() {
       {/* Filters */}
       <FilterBar
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         garmentFilter={garmentFilter}
-        onGarmentFilterChange={setGarmentFilter}
+        onGarmentFilterChange={handleGarmentFilterChange}
         statusFilter={statusFilter}
-        onStatusFilterChange={setStatusFilter}
+        onStatusFilterChange={handleStatusFilterChange}
         onClear={clearFilters}
       />
 
@@ -164,6 +190,30 @@ export default function OrdersPage() {
           />
         )}
       </div>
+
+      {!loading && !error && totalOrders > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <p className="text-xs text-slate-500">
+            Page {page} of {totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
